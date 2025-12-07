@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>題庫學習 APP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            min-height: calc(100vh - 20px);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e0e0e0;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
+        }
+        
+        .nav-tab.active {
+            color: #667eea;
+            background: white;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .content {
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .upload-section {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .auto-load-status {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .auto-load-status.loading {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        
+        .auto-load-status.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .upload-area {
+            background: #f8f9fa;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .bank-list {
+            margin-top: 20px;
+        }
+        
+        .bank-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bank-item.auto-loaded {
+            border-left: 4px solid #28a745;
+        }
+        
+        .bank-item.selected {
+            border: 2px solid #667eea;
+            background: #f0f1ff;
+        }
+        
+        .bank-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+        
+        .bank-info p {
+            color: #666;
+            font-size: 0.85em;
+        }
+        
+        .bank-tag {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            margin-left: 8px;
+        }
+        
+        .bank-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .bank-actions button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        
+        .bank-actions button.delete {
+            background: #dc3545;
+        }
+        
+        .mode-select {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .mode-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .mode-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .mode-card p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .quiz-container {
+            position: relative;
+        }
+        
+        .exit-floating-btn {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.3em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .question-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9em;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .timer-display {
+            font-size: 1em;
+            font-weight: bold;
+            padding: 5px 15px;
+            background: white;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .timer-display.warning {
+            background: #fff3cd;
+            color: #856404;
+            animation: pulse 1s infinite;
+        }
+        
+        .timer-display.danger {
+            background: #f8d7da;
+            color: #721c24;
+            animation: pulse 0.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .question-text {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .question-text-cn {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .question-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .options {
+            margin: 15px 0;
+        }
+        
+        .option {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e0e0e0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .option:active {
+            transform: scale(0.98);
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f1ff;
+        }
+        
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .option.wrong {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .explanation {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .explanation h4 {
+            color: #856404;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .explanation p {
+            color: #856404;
+            line-height: 1.6;
+            font-size: 0.9em;
+        }
+        
+        .quiz-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .result-score {
+            font-size: 4em;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            padding: 20px 10px;
+            border-radius: 15px;
+        }
+        
+        .stat-box h3 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box p {
+            color: #666;
+            font-size: 0.85em;
+        }
+        
+        .exam-setup {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .exam-setup input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .bank-selector {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .refresh-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .mode-select {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .exit-floating-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 題庫學習 APP</h1>
+            <p>智能學習,輕鬆備考</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('manage')">📂 管理題庫</div>
+            <div class="nav-tab" onclick="switchTab('practice')">✏️ 開始練習</div>
+        </div>
+        
+        <div class="content">
+            <div id="manageTab" class="tab-content active">
+                <div class="upload-section">
+                    <div id="autoLoadStatus" class="auto-load-status loading">
+                        <h3 style="margin-bottom: 10px;">🔄 自動載入題庫</h3>
+                        <p id="autoLoadMessage">正在搜尋同資料夾的 JSON 文件...</p>
+                        <button class="refresh-btn" onclick="autoLoadQuestions()">🔄 重新整理</button>
+                    </div>
+                    
+                    <h2 style="color: #667eea; margin-bottom: 15px;">手動匯入題庫</h2>
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📤</div>
+                        <h3>點擊上傳 JSON 文件</h3>
+                        <p style="color: #666; margin-top: 10px;">支持標準格式題庫</p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;">
+                    
+                    <div style="margin-top: 20px;">
+                        <p style="color: #666; margin-bottom: 10px;">或貼上 JSON 資料:</p>
+                        <textarea id="jsonInput" 
+                                  placeholder='貼上 JSON 格式題庫...'
+                                  style="width: 100%; height: 150px; padding: 15px; border: 2px solid #667eea; border-radius: 10px; font-size: 0.9em; font-family: monospace;"></textarea>
+                        <button class="upload-btn" onclick="importFromText()">匯入題庫</button>
+                    </div>
+                </div>
+                
+                <div class="bank-list">
+                    <h2 style="color: #667eea; margin-bottom: 15px;">已匯入的題庫</h2>
+                    <div id="bankListContainer"></div>
+                </div>
+            </div>
+            
+            <div id="practiceTab" class="tab-content">
+                <div id="modeSelection">
+                    <h2 style="color: #667eea; margin-bottom: 15px; text-align: center;">選擇練習模式</h2>
+                    
+                    <div class="bank-selector">
+                        <p style="color: #666; margin-bottom: 8px;">
+                            當前題庫:<strong id="currentBankName" style="color: #667eea;">未選擇</strong>
+                        </p>
+                        <p style="color: #666;">
+                            題目數量:<strong id="currentBankCount" style="color: #667eea;">0</strong> 題
+                        </p>
+                    </div>
+                    
+                    <div class="mode-select">
+                        <div class="mode-card" onclick="startQuiz('sequential')">
+                            <h3>📖 順序練習</h3>
+                            <p>按照題號順序依次作答</p>
+                        </div>
+                        <div class="mode-card" onclick="startQuiz('random')">
+                            <h3>🎲 隨機練習</h3>
+                            <p>隨機打亂題目順序</p>
+                        </div>
+                        <div class="mode-card" onclick="showExamSetup()">
+                            <h3>📝 模擬考試</h3>
+                            <p>計時測驗,查看成績</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="examSetup" class="hidden exam-setup">
+                    <h2 style="color: #667eea; margin-bottom: 20px;">模擬考試設定</h2>
+                    <div style="background: #f8f9fa; padding: 30px 20px; border-radius: 15px;">
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; margin-bottom: 10px; font-size: 1em; color: #333;">
+                                選擇題目數量:
+                            </label>
+                            <input type="number" id="examQuestionCount" min="1" max="1000" value="10">
+                            <p style="color: #666; font-size: 0.85em; margin-top: 5px;">
+                                最多 <span id="maxQuestions">0</span> 題
+                            </p>
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; margin-bottom: 10px; font-size: 1em; color: #333;">
+                                考試時間(分鐘):
+                            </label>
+                            <input type="number" id="examDuration" min="1" max="180" value="60">
+                            <p style="color: #666; font-size: 0.85em; margin-top: 5px;">
+                                建議: 1-180 分鐘
+                            </p>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="startExam()" style="width: 100%; margin-bottom: 10px;">開始考試</button>
+                        <button class="btn btn-secondary" onclick="backToModeSelection()" style="width: 100%;">返回</button>
+                    </div>
+                </div>
+                
+                <div id="quizSection" class="hidden">
+                    <button class="exit-floating-btn" onclick="exitQuiz()">✕</button>
+                    
+                    <div class="quiz-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar"></div>
+                        </div>
+                        
+                        <div class="question-card">
+                            <div class="question-header">
+                                <span id="questionNumber">題目 1/10</span>
+                                <span id="timer" class="timer-display"></span>
+                            </div>
+                            <div class="question-text" id="questionTextEN"></div>
+                            <div class="question-text-cn" id="questionTextCN"></div>
+                            <div id="questionImageContainer"></div>
+                            
+                            <div class="options" id="optionsContainer"></div>
+                            
+                            <div id="explanationBox" class="explanation hidden">
+                                <h4>💡 解析</h4>
+                                <p id="explanationText"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="quiz-actions">
+                            <button class="btn btn-secondary" onclick="previousQuestion()">上一題</button>
+                            <button class="btn btn-secondary" onclick="exitQuiz()">結束</button>
+                            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">下一題</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="resultSection" class="hidden">
+                    <div class="result-container">
+                        <h2 style="color: #667eea;">🎉 測驗完成!</h2>
+                        <div class="result-score" id="finalScore">85%</div>
+                        
+                        <div class="result-stats">
+                            <div class="stat-box">
+                                <h3 id="correctCount">0</h3>
+                                <p>答對</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3 id="wrongCount">0</h3>
+                                <p>答錯</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3 id="timeSpent">0:00</h3>
+                                <p>時間</p>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="restartQuiz()" style="width: 100%; margin-bottom: 10px;">再測一次</button>
+                        <button class="btn btn-secondary" onclick="backToModes()" style="width: 100%;">返回</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let questionBanks = [];
+        let currentBank = null;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let quizMode = '';
+        let startTime = null;
+        let timerInterval = null;
+        let examDuration = 3600;
+        
+        // 自動載入題庫的文件名列表(放在同資料夾)
+        const AUTO_LOAD_FILES = [
+            'ENC.json',
+            'questions.json',
+            'quiz.json',
+            'exam.json',
+            'test.json',
+            'bank.json'
+        ];
+        
+        window.addEventListener('load', () => {
+            loadBanks();
+            autoLoadQuestions();
+        });
+        
+        // 自動載入同資料夾的JSON文件
+        async function autoLoadQuestions() {
+            const statusDiv = document.getElementById('autoLoadStatus');
+            const messageP = document.getElementById('autoLoadMessage');
+            
+            statusDiv.className = 'auto-load-status loading';
+            messageP.textContent = '正在搜尋同資料夾的 JSON 文件...';
+            
+            let loadedCount = 0;
+            
+            for (const filename of AUTO_LOAD_FILES) {
+                try {
+                    const response = await fetch(filename);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        let questions = convertToStandardFormat(data);
+                        
+                        const existingBank = questionBanks.find(b => b.autoLoadFile === filename);
+                        
+                        if (!existingBank && questions.length > 0) {
+                            const bank = {
+                                id: Date.now() + loadedCount,
+                                name: filename.replace('.json', ''),
+                                questions: questions,
+                                createdAt: new Date().toLocaleString('zh-TW', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }),
+                                autoLoaded: true,
+                                autoLoadFile: filename
+                            };
+                            
+                            questionBanks.push(bank);
+                            loadedCount++;
+                        }
+                    }
+                } catch (error) {
+                    console.log(`找不到文件: ${filename}`);
+                }
+            }
+            
+            if (loadedCount > 0) {
+                statusDiv.className = 'auto-load-status';
+                messageP.textContent = `✅ 成功自動載入 ${loadedCount} 個題庫文件`;
+                saveBanks();
+                renderBankList();
+                
+                if (questionBanks.length === 1) {
+                    selectBank(questionBanks[0].id);
+                }
+            } else {
+                statusDiv.className = 'auto-load-status error';
+                messageP.textContent = '❌ 未找到題庫文件,請手動上傳或將 JSON 文件命名為: ' + AUTO_LOAD_FILES.join(', ');
+            }
+        }
+        
+        // 轉換題目格式為標準格式
+        function convertToStandardFormat(data) {
+            let questions = Array.isArray(data) ? data : [data];
+            
+            return questions.map(item => {
+                // 檢測是否為舊格式 (有 "Question :", "EN", "C", "選項", "Answer")
+                if (item.hasOwnProperty('EN') && item.hasOwnProperty('選項') && item.hasOwnProperty('Answer')) {
+                    // 提取選項文字(去掉 A. B. C. D. 前綴)
+                    const options = (item['選項'] || []).map(opt => {
+                        return opt.replace(/^[A-Z]\.\s+/, '').trim();
+                    });
+                    
+                    // 找出正確答案的索引
+                    let answerIndex = 0;
+                    const answerLetter = item.Answer || 'A';
+                    answerIndex = answerLetter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+                    
+                    // 處理圖片 (支援多張圖片或單張)
+                    let images = [];
+                    if (item.Image_Base64) {
+                        if (Array.isArray(item.Image_Base64)) {
+                            images = item.Image_Base64.filter(img => img && img.trim());
+                        } else if (typeof item.Image_Base64 === 'string' && item.Image_Base64.trim()) {
+                            images = [item.Image_Base64];
+                        }
+                    }
+                    
+                    return {
+                        question: item.EN || '',
+                        question_cn: item.C || '',
+                        options: options,
+                        answer: answerIndex,
+                        explanation: item.Explanation || '',
+                        images: images
+                    };
+                } else {
+                    // 已經是標準格式,確保有 images 欄位
+                    let images = [];
+                    if (item.images) {
+                        images = Array.isArray(item.images) ? item.images : [item.images];
+                    } else if (item.Image_Base64) {
+                        images = Array.isArray(item.Image_Base64) ? item.Image_Base64 : [item.Image_Base64];
+                    }
+                    
+                    return {
+                        question: item.question || item.EN || '',
+                        question_cn: item.question_cn || item.C || '',
+                        options: item.options || [],
+                        answer: item.answer || 0,
+                        explanation: item.explanation || item.Explanation || '',
+                        images: images.filter(img => img && img.trim())
+                    };
+                }
+            });
+        }
+        
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) readFile(file);
+        }
+        
+        function readFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let questions = convertToStandardFormat(data);
+                    
+                    const bank = {
+                        id: Date.now(),
+                        name: file.name.replace('.json', ''),
+                        questions: questions,
+                        createdAt: new Date().toLocaleString('zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }),
+                        autoLoaded: false
+                    };
+                    
+                    questionBanks.push(bank);
+                    saveBanks();
+                    renderBankList();
+                    alert('題庫匯入成功!');
+                } catch (error) {
+                    alert('JSON 格式錯誤!');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function importFromText() {
+            const jsonText = document.getElementById('jsonInput').value.trim();
+            
+            if (!jsonText) {
+                alert('請貼上 JSON 資料!');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(jsonText);
+                let questions = convertToStandardFormat(data);
+                
+                const bank = {
+                    id: Date.now(),
+                    name: `題庫 ${new Date().toLocaleTimeString('zh-TW')}`,
+                    questions: questions,
+                    createdAt: new Date().toLocaleString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    autoLoaded: false
+                };
+                
+                questionBanks.push(bank);
+                saveBanks();
+                renderBankList();
+                document.getElementById('jsonInput').value = '';
+                alert('題庫匯入成功!');
+            } catch (error) {
+                alert('JSON 格式錯誤,請檢查格式!');
+            }
+        }
+        
+        function saveBanks() {
+            const manualBanks = questionBanks.filter(b => !b.autoLoaded);
+            localStorage.setItem('questionBanks', JSON.stringify(manualBanks));
+        }
+        
+        function loadBanks() {
+            const saved = localStorage.getItem('questionBanks');
+            if (saved) {
+                const manualBanks = JSON.parse(saved);
+                questionBanks = [...manualBanks];
+            }
+            renderBankList();
+        }
+        
+        function renderBankList() {
+            const container = document.getElementById('bankListContainer');
+            
+            if (questionBanks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>尚未匯入任何題庫</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = questionBanks.map(bank => `
+                <div class="bank-item ${bank.autoLoaded ? 'auto-loaded' : ''} ${currentBank && currentBank.id === bank.id ? 'selected' : ''}" id="bank-${bank.id}">
+                    <div class="bank-info">
+                        <h3>
+                            ${bank.name}
+                            ${bank.autoLoaded ? '<span class="bank-tag">自動載入</span>' : ''}
+                        </h3>
+                        <p>${bank.questions.length} 題 | ${bank.createdAt}</p>
+                    </div>
+                    <div class="bank-actions">
+                        <button onclick="selectBank(${bank.id})">選擇</button>
+                        <button class="delete" onclick="deleteBank(${bank.id})">刪除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function selectBank(id) {
+            currentBank = questionBanks.find(b => b.id === id);
+            if (currentBank) {
+                document.getElementById('currentBankName').textContent = currentBank.name;
+                document.getElementById('currentBankCount').textContent = currentBank.questions.length;
+                document.getElementById('maxQuestions').textContent = currentBank.questions.length;
+                renderBankList();
+            }
+        }
+        
+        function deleteBank(id) {
+            if (confirm('確定要刪除此題庫嗎?')) {
+                questionBanks = questionBanks.filter(b => b.id !== id);
+                if (currentBank && currentBank.id === id) {
+                    currentBank = null;
+                    document.getElementById('currentBankName').textContent = '未選擇';
+                    document.getElementById('currentBankCount').textContent = '0';
+                }
+                saveBanks();
+                renderBankList();
+            }
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'manage') {
+                document.querySelector('.nav-tab:nth-child(1)').classList.add('active');
+                document.getElementById('manageTab').classList.add('active');
+            } else {
+                document.querySelector('.nav-tab:nth-child(2)').classList.add('active');
+                document.getElementById('practiceTab').classList.add('active');
+            }
+        }
+        
+        function startQuiz(mode) {
+            if (!currentBank) {
+                alert('請先選擇一個題庫!');
+                return;
+            }
+            
+            quizMode = mode;
+            currentQuestions = [...currentBank.questions];
+            
+            if (mode === 'random') {
+                currentQuestions = shuffleArray(currentQuestions);
+            }
+            
+            currentQuestionIndex = 0;
+            userAnswers = new Array(currentQuestions.length).fill(null);
+            startTime = Date.now();
+            
+            document.getElementById('modeSelection').classList.add('hidden');
+            document.getElementById('quizSection').classList.remove('hidden');
+            
+            renderQuestion();
+        }
+        
+        function showExamSetup() {
+            if (!currentBank) {
+                alert('請先選擇一個題庫!');
+                return;
+            }
+            
+            document.getElementById('modeSelection').classList.add('hidden');
+            document.getElementById('examSetup').classList.remove('hidden');
+            document.getElementById('examQuestionCount').max = currentBank.questions.length;
+            document.getElementById('maxQuestions').textContent = currentBank.questions.length;
+        }
+        
+        function backToModeSelection() {
+            document.getElementById('examSetup').classList.add('hidden');
+            document.getElementById('modeSelection').classList.remove('hidden');
+        }
+        
+        function startExam() {
+            const count = parseInt(document.getElementById('examQuestionCount').value);
+            const duration = parseInt(document.getElementById('examDuration').value);
+            
+            if (count < 1 || count > currentBank.questions.length) {
+                alert(`請輸入 1 到 ${currentBank.questions.length} 之間的數字!`);
+                return;
+            }
+            
+            if (duration < 1 || duration > 180) {
+                alert('請輸入 1 到 180 分鐘!');
+                return;
+            }
+            
+            quizMode = 'exam';
+            examDuration = duration * 60;
+            currentQuestions = shuffleArray([...currentBank.questions]).slice(0, count);
+            currentQuestionIndex = 0;
+            userAnswers = new Array(currentQuestions.length).fill(null);
+            startTime = Date.now();
+            
+            document.getElementById('examSetup').classList.add('hidden');
+            document.getElementById('quizSection').classList.remove('hidden');
+            
+            startTimer();
+            renderQuestion();
+        }
+        
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer');
+            timerDisplay.classList.remove('hidden');
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = examDuration - elapsed;
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                timerDisplay.textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                timerDisplay.classList.remove('warning', 'danger');
+                if (remaining <= 60) {
+                    timerDisplay.classList.add('danger');
+                } else if (remaining <= 300) {
+                    timerDisplay.classList.add('warning');
+                }
+            }, 1000);
+        }
+        
+        function renderQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('questionNumber').textContent = `題目 ${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('questionTextEN').textContent = question.question || '';
+            document.getElementById('questionTextCN').textContent = question.question_cn || '';
+            
+            // 顯示圖片
+            const imageContainer = document.getElementById('questionImageContainer');
+            if (question.images && question.images.length > 0) {
+                imageContainer.innerHTML = question.images.map(imgData => 
+                    `<img src="${imgData}" class="question-image" alt="題目圖片">`
+                ).join('');
+            } else {
+                imageContainer.innerHTML = '';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            const options = question.options || [];
+            
+            optionsContainer.innerHTML = options.map((opt, idx) => {
+                const letter = String.fromCharCode(65 + idx);
+                const isSelected = userAnswers[currentQuestionIndex] === idx;
+                return `
+                    <div class="option ${isSelected ? 'selected' : ''}" onclick="selectAnswer(${idx})">
+                        <strong>${letter}.</strong> ${opt}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('explanationBox').classList.add('hidden');
+            
+            if (quizMode !== 'exam') {
+                document.getElementById('timer').classList.add('hidden');
+            }
+        }
+        
+        function selectAnswer(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            const question = currentQuestions[currentQuestionIndex];
+            const correctAnswer = question.answer || 0;
+            
+            document.querySelectorAll('.option').forEach((opt, idx) => {
+                opt.classList.remove('selected', 'correct', 'wrong');
+                if (idx === correctAnswer) {
+                    opt.classList.add('correct');
+                }
+                if (idx === optionIndex && idx !== correctAnswer) {
+                    opt.classList.add('wrong');
+                }
+            });
+            
+            if (question.explanation) {
+                document.getElementById('explanationText').textContent = question.explanation;
+                document.getElementById('explanationBox').classList.remove('hidden');
+            }
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+        
+        function exitQuiz() {
+            if (confirm('確定要退出嗎?進度將不會保存。')) {
+                clearInterval(timerInterval);
+                document.getElementById('quizSection').classList.add('hidden');
+                document.getElementById('modeSelection').classList.remove('hidden');
+            }
+        }
+        
+        function showResults() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            currentQuestions.forEach((q, idx) => {
+                const correctAnswer = q.answer || 0;
+                if (userAnswers[idx] === correctAnswer) {
+                    correctCount++;
+                }
+            });
+            
+            const wrongCount = currentQuestions.length - correctCount;
+            const percentage = Math.round((correctCount / currentQuestions.length) * 100);
+            const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(timeElapsed / 60);
+            const seconds = timeElapsed % 60;
+            
+            document.getElementById('finalScore').textContent = percentage + '%';
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('wrongCount').textContent = wrongCount;
+            document.getElementById('timeSpent').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('quizSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+        }
+        
+        function restartQuiz() {
+            document.getElementById('resultSection').classList.add('hidden');
+            
+            if (quizMode === 'exam') {
+                showExamSetup();
+            } else {
+                startQuiz(quizMode);
+            }
+        }
+        
+        function backToModes() {
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('modeSelection').classList.remove('hidden');
+        }
+        
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+    </script>
+</body>
+</html>
